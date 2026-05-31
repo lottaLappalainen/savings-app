@@ -6,16 +6,23 @@ import { EntriesByDay, Goal, PresetWithType, ProfileWithGoal, SavingType } from 
 type AuthStore = {
   session:    Session | null
   profile:    ProfileWithGoal | null
+  theme:      'dark' | 'light'
   setSession: (s: Session | null) => void
   setProfile: (p: ProfileWithGoal | null) => void
+  setTheme:   (t: 'dark' | 'light') => void
   clear:      () => void
 }
 export const useAuthStore = create<AuthStore>((set) => ({
   session:    null,
   profile:    null,
+  theme:      'dark',
   setSession: (session) => set({ session }),
-  setProfile: (profile) => set({ profile }),
-  clear:      () => set({ session: null, profile: null }),
+  setProfile: (profile) => set({
+    profile,
+    theme: (profile?.theme as 'dark' | 'light') ?? 'dark',
+  }),
+  setTheme:   (theme)   => set({ theme }),
+  clear:      () => set({ session: null, profile: null, theme: 'dark' }),
 }))
 
 // ── Goals ─────────────────────────────────

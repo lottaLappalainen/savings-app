@@ -107,6 +107,7 @@ export type Database = {
           current_goal_amount: number
           current_goal_id: string | null
           id: string
+          theme: string
           total_saved: number
           username: string | null
         }
@@ -116,6 +117,7 @@ export type Database = {
           current_goal_amount?: number
           current_goal_id?: string | null
           id?: string
+          theme?: string
           total_saved?: number
           username?: string | null
         }
@@ -125,6 +127,7 @@ export type Database = {
           current_goal_amount?: number
           current_goal_id?: string | null
           id?: string
+          theme?: string
           total_saved?: number
           username?: string | null
         }

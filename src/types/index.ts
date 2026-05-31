@@ -14,6 +14,8 @@ export type PresetItemInsert   = Database['public']['Tables']['preset_items']['I
 export type PresetItemUpdate   = Database['public']['Tables']['preset_items']['Update']
 export type SavingTypeInsert   = Database['public']['Tables']['saving_types']['Insert']
 
+// Supabase returns the joined goal as an array even for single FK joins
+// We normalize it to Goal | null in getProfile()
 export type ProfileWithGoal = Profile & {
   current_goal: Goal | null
 }
@@ -32,7 +34,6 @@ export type EntriesByDay = {
   total:   number
 }
 
-// Params
 export type CreateGoalParams = {
   name:         string
   targetAmount: number
@@ -40,10 +41,10 @@ export type CreateGoalParams = {
 }
 
 export type UpdateGoalParams = {
-  id:           string
-  name?:        string
+  id:            string
+  name?:         string
   targetAmount?: number
-  photoUrl?:    string | null
+  photoUrl?:     string | null
 }
 
 export type AddEntryParams = {
@@ -61,9 +62,9 @@ export type UpdateEntryParams = {
 }
 
 export type CreatePresetParams = {
-  title:   string
-  amount:  number
-  typeId:  string
+  title:  string
+  amount: number
+  typeId: string
 }
 
 export type UpdatePresetParams = {

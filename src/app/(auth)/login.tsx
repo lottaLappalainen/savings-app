@@ -1,12 +1,17 @@
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { Button, Input, Spinner, Text, useTheme, XStack, YStack } from 'tamagui'
+import { Pressable, Text, View } from 'react-native'
+import { useTheme } from 'tamagui'
 import { signIn } from '../../actions/auth'
+import { AppButton } from '../../components/ui/AppButton'
+import { AppText } from '../../components/ui/AppText'
+import { Divider } from '../../components/ui/Divider'
+import { FormField } from '../../components/ui/FormField'
+import { ScreenWrapper } from '../../components/ui/ScreenWrapper'
 
 export default function LoginScreen() {
-  const router   = useRouter()
-  const theme    = useTheme()
+  const router  = useRouter()
+  const theme   = useTheme()
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [loading,  setLoading]  = useState(false)
@@ -14,120 +19,105 @@ export default function LoginScreen() {
   const [showPass, setShowPass] = useState(false)
 
   async function handleLogin() {
-    if (!email || !password) { setError('Please fill in all fields'); return }
+    if (!email || !password) {
+      setError('Please fill in all fields')
+      return
+    }
     setLoading(true)
     setError(null)
     try {
       await signIn(email, password)
       router.replace('/(app)')
     } catch (e: any) {
-      setError(e.message ?? 'Something went wrong')
+      const msg: string = e.message ?? ''
+      if (msg.toLowerCase().includes('invalid')) {
+        setError('Invalid email or password')
+      } else if (msg.toLowerCase().includes('email')) {
+        setError('No account found with this email')
+      } else {
+        setError('Something went wrong, please try again')
+      }
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
-      <YStack flex={1} gap="$4" style={{ justifyContent: 'center', paddingHorizontal: 24 }}>
+    <ScreenWrapper centered>
 
-        <YStack gap="$2" style={{ alignItems: 'center', marginBottom: 16 }}>
-          <YStack style={{
-            width: 56, height: 56,
-            borderRadius: 12,
-            backgroundColor: theme.backgroundHover.val,
-            borderWidth: 0.5,
-            borderColor: theme.borderColor.val,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <Text style={{ fontSize: 26 }}>🐷</Text>
-          </YStack>
-          <Text style={{ fontSize: 22, fontWeight: '500', color: theme.color.val }}>
-            Welcome back
-          </Text>
-          <Text style={{ fontSize: 13, color: theme.colorMuted.val }}>
-            Log in to your account
-          </Text>
-        </YStack>
+      {/* Logo */}
+      <View style={{ alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <View style={{
+          width:           56,
+          height:          56,
+          borderRadius:    12,
+          backgroundColor: theme.backgroundHover.val,
+          borderWidth:     0.5,
+          borderColor:     theme.borderColor.val,
+          alignItems:      'center',
+          justifyContent:  'center',
+        }}>
+          <Text style={{ fontSize: 26 }}>🐷</Text>
+        </View>
+        <AppText variant="heading">Welcome back</AppText>
+        <AppText variant="muted">Log in to your account</AppText>
+      </View>
 
-        <YStack gap="$1">
-          <Text style={{ fontSize: 12, color: theme.colorMuted.val }}>Email</Text>
-          <Input
-            placeholder="you@email.com"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            style={{
-              backgroundColor: theme.backgroundHover.val,
-              borderColor: theme.borderColor.val,
-              color: theme.color.val,
-            }}
-            placeholderTextColor="$colorMuted"
-          />
-        </YStack>
-
-        <YStack gap="$1">
-          <Text style={{ fontSize: 12, color: theme.colorMuted.val }}>Password</Text>
-          <XStack style={{ alignItems: 'center' }}>
-            <Input
-              flex={1}
-              placeholder="••••••••"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPass}
-              style={{
-                backgroundColor: theme.backgroundHover.val,
-                borderColor: theme.borderColor.val,
-                color: theme.color.val,
-              }}
-              placeholderTextColor="$colorMuted"
-            />
-            <Text
-              style={{ position: 'absolute', right: 12, color: theme.colorMuted.val }}
+      {/* Fields */}
+      <View style={{ gap: 12 }}>
+        <FormField
+          label="Email"
+          placeholder="you@email.com"
+          value={email}
+          onChangeText={(t) => { setEmail(t); setError(null) }}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          error={error ?? undefined}
+        />
+        <FormField
+          label="Password"
+          placeholder="••••••••"
+          value={password}
+          onChangeText={(t) => { setPassword(t); setError(null) }}
+          secureTextEntry={!showPass}
+          error={undefined}
+          rightElement={
+            <Pressable
               onPress={() => setShowPass(p => !p)}
+              style={{ padding: 4 }}
             >
-              {showPass ? '🙈' : '👁'}
-            </Text>
-          </XStack>
-        </YStack>
+              <Text style={{ fontSize: 16 }}>{showPass ? '🙈' : '👁'}</Text>
+            </Pressable>
+          }
+        />
+      </View>
 
-        {error && (
-          <Text style={{ fontSize: 12, color: '#ef4444', textAlign: 'center' }}>
-            {error}
-          </Text>
-        )}
+      {/* Inline error */}
+      {error && (
+        <View style={{
+          backgroundColor: '#2e1a1a',
+          borderWidth:     1,
+          borderColor:     '#ef4444',
+          borderRadius:    10,
+          padding:         12,
+        }}>
+          <Text style={{ color: '#ef4444', fontSize: 13 }}>{error}</Text>
+        </View>
+      )}
 
-        <Button
-          onPress={handleLogin}
-          disabled={loading}
-          style={{
-            backgroundColor: theme.primary.val,
-            borderRadius: 12,
-            opacity: loading ? 0.7 : 1,
-          }}
-        >
-          <Text style={{ color: theme.background.val, fontWeight: '700', fontSize: 15 }}>
-            {loading ? <Spinner /> : 'Log in'}
-          </Text>
-        </Button>
+      <AppButton onPress={handleLogin} loading={loading}>
+        Log in
+      </AppButton>
 
-        <XStack style={{ alignItems: 'center', gap: 12 }}>
-          <YStack style={{ flex: 1, height: 0.5, backgroundColor: theme.borderColor.val }} />
-          <Text style={{ fontSize: 12, color: theme.colorMuted.val }}>or</Text>
-          <YStack style={{ flex: 1, height: 0.5, backgroundColor: theme.borderColor.val }} />
-        </XStack>
+      <Divider label="or" />
 
-        <Text
-          style={{ textAlign: 'center', fontSize: 13, color: theme.colorMuted.val }}
-          onPress={() => router.push('/(auth)/register')}
-        >
+      <Pressable onPress={() => router.push('/(auth)/register')}>
+        <AppText variant="muted" style={{ textAlign: 'center' }}>
           Don't have an account?{' '}
           <Text style={{ color: theme.primary.val, fontWeight: '500' }}>Sign up</Text>
-        </Text>
+        </AppText>
+      </Pressable>
 
-      </YStack>
-    </SafeAreaView>
+    </ScreenWrapper>
   )
 }

@@ -7,12 +7,10 @@ import { EntryEditForm } from '../../components/features/logs/EntryEditForm'
 import { EntryRow } from '../../components/features/logs/EntryRow'
 import { LogsHeader } from '../../components/features/logs/LogsHeader'
 import { ScreenWrapper } from '../../components/ui/ScreenWrapper'
-import { SkeletonLogRow } from '../../components/ui/SkeletonLogRow'
 import { Toast } from '../../components/ui/Toast'
 import { useToast } from '../../hooks/useToast'
 import { useAuthStore, useHistoryStore, useTypeStore } from '../../store'
 import type { EntryWithType } from '../../types'
-import { useBootstrapReady } from './_layout'
 
 type EditState = {
   id:     string
@@ -30,7 +28,6 @@ export default function LogsScreen() {
   const { setHistory } = useHistoryStore()
   const { setProfile } = useAuthStore()
   const { toast, showToast, hideToast } = useToast()
-  const { historyReady, typesReady } = useBootstrapReady()
 
   const [search,       setSearch]       = useState('')
   const [filterTypeId, setFilterTypeId] = useState<string | null>(null)
@@ -106,8 +103,6 @@ export default function LogsScreen() {
     finally { setDeleting(null) }
   }
 
-  const isReady = historyReady && typesReady
-
   return (
     <ScreenWrapper padded={false}>
       <Toast
@@ -133,24 +128,22 @@ export default function LogsScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Skeleton rows while loading */}
-        {!isReady && (
-          <View style={{ gap: 8, marginTop: 8 }}>
-            {Array.from({ length: 6 }).map((_, i) => (
-              <SkeletonLogRow key={i} />
-            ))}
-          </View>
-        )}
-
-        {isReady && grouped.length === 0 && (
-          <View style={{ paddingTop: 40, alignItems: 'center' }}>
-            <Text style={{ color: theme.colorMuted.val, fontSize: 14 }}>
-              {isFiltering ? 'No entries match your search' : 'No entries yet'}
+        {grouped.length === 0 && (
+          <View style={{ paddingTop: 60, alignItems: 'center', gap: 8 }}>
+            <Text style={{ fontSize: 32 }}>📋</Text>
+            <Text style={{ fontSize: 15, fontWeight: '600', color: theme.color.val }}>
+              No entries yet
+            </Text>
+            <Text style={{ fontSize: 13, color: theme.colorMuted.val, textAlign: 'center' }}>
+              {isFiltering
+                ? 'No entries match your search'
+                : 'Log your first saving on the home screen'
+              }
             </Text>
           </View>
         )}
 
-        {isReady && grouped.map(([date, entries]) => (
+        {grouped.map(([date, entries]) => (
           <View key={date} style={{ gap: 6 }}>
             <Text style={{
               fontSize:     12,
