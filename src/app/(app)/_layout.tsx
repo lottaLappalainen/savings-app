@@ -1,13 +1,31 @@
 import { Tabs } from 'expo-router'
 import type { BottomTabBarProps } from 'expo-router/build/react-navigation/bottom-tabs/types'
+import { createContext, useContext } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import { useTheme } from 'tamagui'
 import { useBootstrap } from '../../hooks/useBootstrap'
 
-type Route = {
-  name: string
-  key:  string
+type BootstrapReady = {
+  profileReady: boolean
+  goalsReady:   boolean
+  historyReady: boolean
+  presetsReady: boolean
+  typesReady:   boolean
 }
+
+export const BootstrapContext = createContext<BootstrapReady>({
+  profileReady: false,
+  goalsReady:   false,
+  historyReady: false,
+  presetsReady: false,
+  typesReady:   false,
+})
+
+export function useBootstrapReady() {
+  return useContext(BootstrapContext)
+}
+
+type Route = { name: string; key: string }
 
 function TabBar({ state, navigation }: BottomTabBarProps) {
   const theme = useTheme()
@@ -90,16 +108,18 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
 }
 
 export default function AppLayout() {
-  useBootstrap()
+  const ready = useBootstrap()
 
   return (
-    <Tabs
-      tabBar={(props) => <TabBar {...props} />}
-      screenOptions={{ headerShown: false }}
-    >
-      <Tabs.Screen name="logs"     />
-      <Tabs.Screen name="index"    />
-      <Tabs.Screen name="settings" />
-    </Tabs>
+    <BootstrapContext.Provider value={ready}>
+      <Tabs
+        tabBar={(props) => <TabBar {...props} />}
+        screenOptions={{ headerShown: false }}
+      >
+        <Tabs.Screen name="logs"     />
+        <Tabs.Screen name="index"    />
+        <Tabs.Screen name="settings" />
+      </Tabs>
+    </BootstrapContext.Provider>
   )
 }

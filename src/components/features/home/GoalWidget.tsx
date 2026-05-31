@@ -1,18 +1,19 @@
-import { Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 import { useTheme } from 'tamagui'
 import type { Goal } from '../../../types'
 
 type Props = {
-  currentGoal: Goal | null
-  totalSaved:  number
-  goalAmount:  number
+  currentGoal:  Goal | null
+  totalSaved:   number
+  goalAmount:   number
+  onSetGoal:    () => void
 }
 
 function fmt(n: number) { return n.toFixed(2) }
 
-export function GoalWidget({ currentGoal, totalSaved, goalAmount }: Props) {
-  const theme    = useTheme()
-  const target   = Number(currentGoal?.target_amount ?? 0)
+export function GoalWidget({ currentGoal, totalSaved, goalAmount, onSetGoal }: Props) {
+  const theme     = useTheme()
+  const target    = Number(currentGoal?.target_amount ?? 0)
   const remaining = Math.max(0, target - goalAmount)
   const progress  = target > 0 ? Math.min(1, goalAmount / target) : 0
 
@@ -57,20 +58,20 @@ export function GoalWidget({ currentGoal, totalSaved, goalAmount }: Props) {
             </Text>
           </View>
 
-            {/* Progress bar */}
-            <View style={{
+          {/* Progress bar */}
+          <View style={{
             backgroundColor: theme.borderColor.val,
             borderRadius:    99,
             height:          6,
             overflow:        'hidden',
-            }}>
+          }}>
             <View style={{
-                backgroundColor: theme.primary.val,
-                height:          6,
-                width:           `${(progress * 100).toFixed(1)}%` as `${number}%`,
-                borderRadius:    99,
+              backgroundColor: theme.primary.val,
+              height:          6,
+              width:           `${(progress * 100).toFixed(1)}%` as `${number}%`,
+              borderRadius:    99,
             }} />
-            </View>
+          </View>
 
           <Text style={{
             fontSize:   32,
@@ -83,18 +84,40 @@ export function GoalWidget({ currentGoal, totalSaved, goalAmount }: Props) {
           </Text>
         </View>
       ) : (
-        <View style={{
-          backgroundColor: theme.backgroundHover.val,
-          borderRadius:    16,
-          borderWidth:     0.5,
-          borderColor:     theme.borderColor.val,
-          padding:         20,
-          alignItems:      'center',
-        }}>
-          <Text style={{ fontSize: 14, color: theme.colorMuted.val, textAlign: 'center' }}>
-            No active goal — set one in Settings
+        /* ── No goal — shortcut card ── */
+        <Pressable
+          onPress={onSetGoal}
+          style={({ pressed }) => ({
+            backgroundColor: theme.backgroundHover.val,
+            borderRadius:    16,
+            borderWidth:     1,
+            borderColor:     theme.primary.val,
+            borderStyle:     'dashed',
+            padding:         24,
+            alignItems:      'center',
+            gap:             10,
+            opacity:         pressed ? 0.7 : 1,
+          })}
+        >
+          <Text style={{ fontSize: 32 }}>🎯</Text>
+          <Text style={{ fontSize: 15, fontWeight: '600', color: theme.primary.val }}>
+            Set a goal
           </Text>
-        </View>
+          <Text style={{ fontSize: 13, color: theme.colorMuted.val, textAlign: 'center' }}>
+            Tap to add your first savings goal and start tracking
+          </Text>
+          <View style={{
+            backgroundColor: theme.primary.val,
+            borderRadius:    10,
+            paddingVertical: 10,
+            paddingHorizontal: 24,
+            marginTop:       4,
+          }}>
+            <Text style={{ fontSize: 14, fontWeight: '700', color: theme.background.val }}>
+              Add goal
+            </Text>
+          </View>
+        </Pressable>
       )}
     </View>
   )
