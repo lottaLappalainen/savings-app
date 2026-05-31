@@ -6,7 +6,7 @@ import { TamaguiProvider } from 'tamagui'
 import config from '../../tamagui.config'
 import { getProfile } from '../actions/auth'
 import { supabase } from '../lib/supabase'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore } from '../store/index'
 
 SplashScreen.preventAutoHideAsync()
 
@@ -53,7 +53,7 @@ export default function RootLayout() {
     if (!session && !inAuthGroup) {
       router.replace('/(auth)/register')
     } else if (session && inAuthGroup) {
-      router.replace('/(app)/index')
+      router.replace('/(app)')
     }
 
     SplashScreen.hideAsync()

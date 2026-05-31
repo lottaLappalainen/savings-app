@@ -61,6 +61,8 @@ export type Database = {
           created_at: string
           id: string
           title: string
+          type_id: string
+          updated_at: string
           user_id: string
         }
         Insert: {
@@ -68,6 +70,8 @@ export type Database = {
           created_at?: string
           id?: string
           title: string
+          type_id: string
+          updated_at?: string
           user_id: string
         }
         Update: {
@@ -75,9 +79,18 @@ export type Database = {
           created_at?: string
           id?: string
           title?: string
+          type_id?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "preset_items_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "saving_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "preset_items_user_id_fkey"
             columns: ["user_id"]
@@ -91,22 +104,28 @@ export type Database = {
         Row: {
           auth_user_id: string
           created_at: string
+          current_goal_amount: number
           current_goal_id: string | null
           id: string
+          total_saved: number
           username: string | null
         }
         Insert: {
           auth_user_id: string
           created_at?: string
+          current_goal_amount?: number
           current_goal_id?: string | null
           id?: string
+          total_saved?: number
           username?: string | null
         }
         Update: {
           auth_user_id?: string
           created_at?: string
+          current_goal_amount?: number
           current_goal_id?: string | null
           id?: string
+          total_saved?: number
           username?: string | null
         }
         Relationships: [
@@ -119,6 +138,35 @@ export type Database = {
           },
         ]
       }
+      saving_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saving_types_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       savings_entries: {
         Row: {
           amount: number
@@ -127,6 +175,8 @@ export type Database = {
           id: string
           preset_id: string | null
           title: string | null
+          type_id: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
@@ -136,6 +186,8 @@ export type Database = {
           id?: string
           preset_id?: string | null
           title?: string | null
+          type_id?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
@@ -145,6 +197,8 @@ export type Database = {
           id?: string
           preset_id?: string | null
           title?: string | null
+          type_id?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -160,6 +214,13 @@ export type Database = {
             columns: ["preset_id"]
             isOneToOne: false
             referencedRelation: "preset_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_entries_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "saving_types"
             referencedColumns: ["id"]
           },
           {

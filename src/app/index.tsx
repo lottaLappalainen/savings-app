@@ -1,7 +1,7 @@
 import { Redirect } from 'expo-router'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore } from '../store/index'
 
 export default function Index() {
   const session = useAuthStore(s => s.session)
-  return <Redirect href={session ? '/(app)/index' : '/(auth)/register'} />
+  return <Redirect href={session ? '/(app)' : '/(auth)/register'} />
 }
