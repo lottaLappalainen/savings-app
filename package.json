@@ -3,8 +3,10 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
+    "@expo-google-fonts/inter": "^0.4.2",
     "@expo/ui": "~56.0.15",
     "@supabase/supabase-js": "^2.106.2",
+    "@tamagui/config": "^2.1.0",
     "expo": "~56.0.8",
     "expo-constants": "~56.0.16",
     "expo-device": "~56.0.4",
@@ -28,6 +30,7 @@
     "react-native-screens": "4.25.2",
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.8.3",
+    "tamagui": "^2.1.0",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
