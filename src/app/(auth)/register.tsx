@@ -1,133 +1,126 @@
+// src/app/(auth)/register.tsx
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { Button, Input, Spinner, Text, useTheme, XStack, YStack } from 'tamagui'
+import { Pressable, Text, View } from 'react-native'
+import { useTheme } from 'tamagui'
 import { signUp } from '../../actions/auth'
+import { AppButton } from '../../components/ui/AppButton'
+import { AppText } from '../../components/ui/AppText'
+import { Divider } from '../../components/ui/Divider'
+import { FormField } from '../../components/ui/FormField'
+import { ScreenWrapper } from '../../components/ui/ScreenWrapper'
+import { Toast } from '../../components/ui/Toast'
+import { useToast } from '../../hooks/useToast'
 
 export default function RegisterScreen() {
-  const router   = useRouter()
-  const theme    = useTheme()
+  const router  = useRouter()
+  const theme   = useTheme()
+  const { toast, showToast, hideToast } = useToast()
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [loading,  setLoading]  = useState(false)
-  const [error,    setError]    = useState<string | null>(null)
+  const [errors,   setErrors]   = useState<{ email?: string; password?: string }>({})
   const [showPass, setShowPass] = useState(false)
 
+  function validate(): boolean {
+    const e: { email?: string; password?: string } = {}
+    if (!email)              e.email    = 'Email is required'
+    else if (!email.includes('@')) e.email = 'Enter a valid email'
+    if (!password)           e.password = 'Password is required'
+    else if (password.length < 6) e.password = 'Password must be at least 6 characters'
+    setErrors(e)
+    return Object.keys(e).length === 0
+  }
+
   async function handleRegister() {
-    if (!email || !password) { setError('Please fill in all fields'); return }
+    if (!validate()) return
     setLoading(true)
-    setError(null)
     try {
       await signUp(email, password)
-      router.replace('/(app)')
+      showToast('Account created!', 'success')
+      setTimeout(() => router.replace('/(app)'), 1000)
     } catch (e: any) {
-      setError(e.message ?? 'Something went wrong')
+      const msg: string = e.message ?? ''
+      if (msg.toLowerCase().includes('already')) {
+        setErrors({ email: 'An account with this email already exists' })
+      } else {
+        showToast('Something went wrong, please try again', 'error')
+      }
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background.val }}>
-      <YStack flex={1} gap="$4" style={{ justifyContent: 'center', paddingHorizontal: 24 }}>
+    <ScreenWrapper centered>
 
-        <YStack gap="$2" style={{ alignItems: 'center', marginBottom: 16 }}>
-          <YStack style={{
-            width: 56, height: 56,
-            borderRadius: 12,
-            backgroundColor: theme.backgroundHover.val,
-            borderWidth: 0.5,
-            borderColor: theme.borderColor.val,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <Text style={{ fontSize: 26 }}>🐷</Text>
-          </YStack>
-          <Text style={{ fontSize: 22, fontWeight: '500', color: theme.color.val }}>
-            Create account
-          </Text>
-          <Text style={{ fontSize: 13, color: theme.colorMuted.val }}>
-            Start tracking your savings
-          </Text>
-        </YStack>
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        visible={toast.visible}
+        onHide={hideToast}
+      />
 
-        <YStack gap="$1">
-          <Text style={{ fontSize: 12, color: theme.colorMuted.val }}>Email</Text>
-          <Input
-            placeholder="you@email.com"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            style={{
-              backgroundColor: theme.backgroundHover.val,
-              borderColor: theme.borderColor.val,
-              color: theme.color.val,
-            }}
-            placeholderTextColor="$colorMuted"
-          />
-        </YStack>
+      {/* Logo */}
+      <View style={{ alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <View style={{
+          width:           56,
+          height:          56,
+          borderRadius:    12,
+          backgroundColor: theme.backgroundHover.val,
+          borderWidth:     0.5,
+          borderColor:     theme.borderColor.val,
+          alignItems:      'center',
+          justifyContent:  'center',
+        }}>
+          <Text style={{ fontSize: 26 }}>🐷</Text>
+        </View>
+        <AppText variant="heading">Create account</AppText>
+        <AppText variant="muted">Start tracking your savings</AppText>
+      </View>
 
-        <YStack gap="$1">
-          <Text style={{ fontSize: 12, color: theme.colorMuted.val }}>Password</Text>
-          <XStack style={{ alignItems: 'center' }}>
-            <Input
-              flex={1}
-              placeholder="••••••••"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPass}
-              style={{
-                backgroundColor: theme.backgroundHover.val,
-                borderColor: theme.borderColor.val,
-                color: theme.color.val,
-              }}
-            placeholderTextColor="$colorMuted"
-            />
-            <Text
-              style={{ position: 'absolute', right: 12, color: theme.colorMuted.val }}
+      {/* Fields */}
+      <View style={{ gap: 12 }}>
+        <FormField
+          label="Email"
+          placeholder="you@email.com"
+          value={email}
+          onChangeText={(t) => { setEmail(t); setErrors(e => ({ ...e, email: undefined })) }}
+          autoCapitalize="none"
+          keyboardType="email-address"
+          error={errors.email}
+        />
+        <FormField
+          label="Password"
+          placeholder="••••••••"
+          value={password}
+          onChangeText={(t) => { setPassword(t); setErrors(e => ({ ...e, password: undefined })) }}
+          secureTextEntry={!showPass}
+          error={errors.password}
+          rightElement={
+            <Pressable
               onPress={() => setShowPass(p => !p)}
+              style={{ padding: 4 }}
             >
-              {showPass ? '🙈' : '👁'}
-            </Text>
-          </XStack>
-        </YStack>
+              <Text style={{ fontSize: 16 }}>{showPass ? '🙈' : '👁'}</Text>
+            </Pressable>
+          }
+        />
+      </View>
 
-        {error && (
-          <Text style={{ fontSize: 12, color: '#ef4444', textAlign: 'center' }}>
-            {error}
-          </Text>
-        )}
+      <AppButton onPress={handleRegister} loading={loading}>
+        Create account
+      </AppButton>
 
-        <Button
-          onPress={handleRegister}
-          disabled={loading}
-          style={{
-            backgroundColor: theme.primary.val,
-            borderRadius: 12,
-            opacity: loading ? 0.7 : 1,
-          }}
-        >
-          <Text style={{ color: theme.background.val, fontWeight: '700', fontSize: 15 }}>
-            {loading ? <Spinner /> : 'Create account'}
-          </Text>
-        </Button>
+      <Divider label="or" />
 
-        <XStack style={{ alignItems: 'center', gap: 12 }}>
-          <YStack style={{ flex: 1, height: 0.5, backgroundColor: theme.borderColor.val }} />
-          <Text style={{ fontSize: 12, color: theme.colorMuted.val }}>or</Text>
-          <YStack style={{ flex: 1, height: 0.5, backgroundColor: theme.borderColor.val }} />
-        </XStack>
-
-        <Text
-          style={{ textAlign: 'center', fontSize: 13, color: theme.colorMuted.val }}
-          onPress={() => router.push('/(auth)/login')}
-        >
+      <Pressable onPress={() => router.push('/(auth)/login')}>
+        <AppText variant="muted" style={{ textAlign: 'center' }}>
           Already have an account?{' '}
           <Text style={{ color: theme.primary.val, fontWeight: '500' }}>Log in</Text>
-        </Text>
+        </AppText>
+      </Pressable>
 
-      </YStack>
-    </SafeAreaView>
+    </ScreenWrapper>
   )
 }

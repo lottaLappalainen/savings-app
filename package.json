@@ -5,6 +5,7 @@
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo/ui": "~56.0.15",
+    "@react-navigation/bottom-tabs": "^7.16.2",
     "@supabase/supabase-js": "^2.106.2",
     "@tamagui/babel-plugin": "^2.1.0",
     "@tamagui/config": "^2.1.0",
